@@ -9,40 +9,21 @@ const FormularioContatoScreen = () => {
   const navigation = useNavigation();
 
   const handleSalvar = async () => {
-    if (!nome || !telefone) {
-        Alert.alert('Erro', 'Preencha todos os campos');
-        return;
-    }
+    if (!nome || !telefone) return Alert.alert('Erro', 'Preencha todos os campos');
 
     try {
-      await api.post('/contatos', {
-        nome,
-        telefone,
-        imageUrl: ''
-      });
+      await api.post('/contatos', { nome, telefone });
       Alert.alert('Sucesso', 'Contato salvo!');
       navigation.goBack();
     } catch (error) {
-      console.error(error);
       Alert.alert('Erro', 'Não foi possível salvar.');
     }
   };
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="Nome"
-        value={nome}
-        onChangeText={setNome}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Telefone"
-        value={telefone}
-        onChangeText={setTelefone}
-        keyboardType="phone-pad"
-      />
+      <TextInput style={styles.input} placeholder="Nome" value={nome} onChangeText={setNome} />
+      <TextInput style={styles.input} placeholder="Telefone" value={telefone} onChangeText={setTelefone} keyboardType="phone-pad" />
       <Button title="Salvar Contato" onPress={handleSalvar} />
     </View>
   );
@@ -50,14 +31,7 @@ const FormularioContatoScreen = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20, backgroundColor: '#fff' },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    marginBottom: 15,
-    borderRadius: 5,
-    fontSize: 16
-  }
+  input: { borderWidth: 1, borderColor: '#ccc', padding: 10, marginBottom: 15, borderRadius: 5 }
 });
 
 export default FormularioContatoScreen;

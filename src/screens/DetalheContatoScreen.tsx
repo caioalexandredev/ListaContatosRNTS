@@ -4,33 +4,28 @@ import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { RootStackParamList } from '../types';
 import api from '../services/api';
 
-type DetalheScreenRouteProp = RouteProp<RootStackParamList, 'Detalhe'>;
+type DetalheRoute = RouteProp<RootStackParamList, 'Detalhe'>;
 
 const DetalheContatoScreen: React.FC = () => {
-  const route = useRoute<DetalheScreenRouteProp>();
+  const route = useRoute<DetalheRoute>();
   const navigation = useNavigation();
   const { contato } = route.params;
 
   const handleExcluir = () => {
-    Alert.alert(
-      "Confirmar",
-      "Deseja apagar este contato?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        { 
-          text: "Apagar", 
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await api.delete(`/contatos/${contato.id}`);
-              navigation.goBack();
-            } catch (error) {
-              Alert.alert("Erro", "Não foi possível excluir");
-            }
-          } 
+    Alert.alert("Confirmar", "Apagar este contato?", [
+      { text: "Cancelar" },
+      {
+        text: "Apagar", style: 'destructive',
+        onPress: async () => {
+          try {
+            await api.delete(`/contatos/${contato.id}`);
+            navigation.goBack();
+          } catch (error) {
+            Alert.alert("Erro", "Falha ao excluir.");
+          }
         }
-      ]
-    );
+      }
+    ]);
   };
 
   return (
@@ -39,9 +34,8 @@ const DetalheContatoScreen: React.FC = () => {
       <View style={styles.infoContainer}>
         <Text style={styles.nome}>{contato.nome}</Text>
         <Text style={styles.telefone}>{contato.telefone}</Text>
-        
-        <View style={styles.buttonContainer}>
-            <Button title="Excluir Contato" color="red" onPress={handleExcluir} />
+        <View style={{ marginTop: 30, width: '100%' }}>
+          <Button title="Excluir Contato" color="red" onPress={handleExcluir} />
         </View>
       </View>
     </SafeAreaView>
@@ -52,9 +46,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   image: { width: '100%', height: 300, resizeMode: 'cover' },
   infoContainer: { padding: 20, alignItems: 'center' },
-  nome: { fontSize: 28, fontWeight: 'bold', color: '#333' },
-  telefone: { fontSize: 20, color: '#666', marginTop: 10, marginBottom: 30 },
-  buttonContainer: { width: '100%', paddingHorizontal: 20 }
+  nome: { fontSize: 28, fontWeight: 'bold' },
+  telefone: { fontSize: 20, color: '#666', marginTop: 10 }
 });
-
 export default DetalheContatoScreen;

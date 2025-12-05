@@ -9,4 +9,5 @@ export type RootStackParamList = {
   Lista: undefined;
   Detalhe: { contato: Contato };
   Formulario: undefined;
+  Login: undefined;
 };
