@@ -1,70 +1,89 @@
-import React, { useState, useMemo } from 'react';
-import { FlatList, StyleSheet, View, ListRenderItemInfo } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import { View, FlatList, StyleSheet, ActivityIndicator, TouchableOpacity, Text } from 'react-native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList, Contato } from '../types';
 import ContatoCard from '../components/ContatoCard';
 import SearchBar from '../components/SearchBar';
+import api from '../services/api';
+import { Feather } from '@expo/vector-icons';
 
-type ListaScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'Lista'>;
+type ListaScreenProp = NativeStackNavigationProp<RootStackParamList, 'Lista'>;
 
-interface Props {
-  navigation: ListaScreenNavigationProp;
-}
-
-const DADOS_CONTATOS: Contato[] = [
-  { id: '1', nome: 'Ana Silva', telefone: '(11) 98765-4321', imageUrl: 'https://i.pravatar.cc/150?img=1' },
-  { id: '2', nome: 'Bruno Martins', telefone: '(21) 91234-5678', imageUrl: 'https://i.pravatar.cc/150?img=7' },
-  { id: '3', nome: 'Carla Souza', telefone: '(31) 95555-1234', imageUrl: 'https://i.pravatar.cc/150?img=26' },
-  { id: '4', nome: 'Daniel Costa', telefone: '(41) 94444-9876', imageUrl: 'https://i.pravatar.cc/150?img=12' },
-  { id: '5', nome: 'Elisa Ferreira', telefone: '(51) 93333-6543', imageUrl: 'https://i.pravatar.cc/150?img=32' },
-];
-
-const ListaContatosScreen: React.FC<Props> = ({ navigation }) => {
+const ListaContatosScreen: React.FC = () => {
+  const navigation = useNavigation<ListaScreenProp>();
+  const [contatos, setContatos] = useState<Contato[]>([]);
+  const [loading, setLoading] = useState(true);
   const [termoBusca, setTermoBusca] = useState('');
 
-  const contatosFiltrados = useMemo(() => {
-    if (!termoBusca) {
-      return DADOS_CONTATOS;
+  const carregarContatos = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/contatos');
+      setContatos(response.data);
+    } catch (error) {
+      console.error("Erro ao buscar contatos", error);
+    } finally {
+      setLoading(false);
     }
-    
-    return DADOS_CONTATOS.filter(contato =>
-      contato.nome.toLowerCase().includes(termoBusca.toLowerCase())
-    );
-  }, [termoBusca]);
-
-  const handleSelectContato = (contato: Contato) => {
-    navigation.navigate('Detalhe', { contato: contato });
   };
 
-  const renderizaItem = ({ item }: ListRenderItemInfo<Contato>) => (
-    <ContatoCard 
-      contato={item} 
-      onPress={() => handleSelectContato(item)} 
-    />
+  useFocusEffect(
+    useCallback(() => {
+      carregarContatos();
+    }, [])
+  );
+
+  const contatosFiltrados = contatos.filter(contato =>
+     contato.nome.toLowerCase().includes(termoBusca.toLowerCase())
   );
 
   return (
     <View style={styles.container}>
-      <SearchBar
-        value={termoBusca}
-        onChangeText={setTermoBusca}
-        placeholder="Buscar contato..."
-      />
+      <SearchBar value={termoBusca} onChangeText={setTermoBusca} />
+      
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" style={{ marginTop: 20 }} />
+      ) : (
+        <FlatList
+          data={contatosFiltrados}
+          renderItem={({ item }) => (
+            <ContatoCard 
+              contato={item} 
+              onPress={() => navigation.navigate('Detalhe', { contato: item })} 
+            />
+          )}
+          keyExtractor={item => String(item.id)}
+        />
+      )}
 
-      <FlatList
-        data={contatosFiltrados} 
-        renderItem={renderizaItem}
-        keyExtractor={item => item.id}
-      />
+      <TouchableOpacity 
+        style={styles.fab} 
+        onPress={() => navigation.navigate('Formulario')}
+      >
+        <Feather name="plus" size={24} color="#FFF" />
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f0f0f0',
-  },
+  container: { flex: 1, backgroundColor: '#f0f0f0' },
+  fab: {
+    position: 'absolute',
+    width: 56,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
+    right: 20,
+    bottom: 20,
+    backgroundColor: '#007bff',
+    borderRadius: 28,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 2 }
+  }
 });
 
 export default ListaContatosScreen;

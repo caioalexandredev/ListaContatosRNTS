@@ -7,6 +7,6 @@ export interface Contato {
 
 export type RootStackParamList = {
   Lista: undefined;
-  
   Detalhe: { contato: Contato };
+  Formulario: undefined;
 };
