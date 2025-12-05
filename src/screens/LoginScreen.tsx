@@ -24,8 +24,7 @@ const LoginScreen = () => {
     } catch (error) {
       console.log(error);
       if (isRegistro) {
-
-        Alert.alert("Erro", "Falha na autenticação. Verifique email/senha.");
+        Alert.alert("Erro", "Falha no cadastro. Email já cadastrado!");
       } else {
         Alert.alert("Erro", "Falha na autenticação. Verifique email/senha.");
       }
